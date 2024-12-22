@@ -1,0 +1,75 @@
+package pubsub
+
+import (
+	"fmt"
+	"sync"
+)
+
+// PubSub struct manages publishers and subscribers
+type PubSub struct {
+	subscribers map[string]map[chan string]struct{}
+	mu          sync.RWMutex
+}
+
+// NewPubSub initializes a new PubSub
+func NewPubSub() *PubSub {
+	return &PubSub{
+		subscribers: make(map[string]map[chan string]struct{}),
+	}
+}
+
+// Subscribe adds a subscriber to a specific topic
+func (ps *PubSub) Subscribe(topic string) <-chan string {
+	ch := make(chan string, 10) // Buffered channel with a larger buffer
+	ps.mu.Lock()
+	defer ps.mu.Unlock()
+
+	if ps.subscribers[topic] == nil {
+		ps.subscribers[topic] = make(map[chan string]struct{})
+	}
+	ps.subscribers[topic][ch] = struct{}{}
+	return ch
+}
+
+// Publish sends a message to all subscribers of a topic
+func (ps *PubSub) Publish(topic, message string) {
+	ps.mu.RLock()
+	defer ps.mu.RUnlock()
+
+	for ch := range ps.subscribers[topic] {
+		select {
+		case ch <- message:
+		default: // Avoid blocking if subscriber is slow
+			fmt.Println("Subscriber is too slow. Dropping message:", message)
+		}
+	}
+}
+
+// Unsubscribe removes a subscriber from a specific topic
+func (ps *PubSub) Unsubscribe(topic string, ch <-chan string) {
+	ps.mu.Lock()
+	defer ps.mu.Unlock()
+
+	if subscribers, ok := ps.subscribers[topic]; ok {
+		if _, exists := subscribers[ch]; exists {
+			delete(subscribers, ch)
+			close(ch) // Close channel to signal subscriber
+		}
+		if len(subscribers) == 0 {
+			delete(ps.subscribers, topic)
+		}
+	}
+}
+
+// Shutdown gracefully shuts down PubSub by closing all channels
+func (ps *PubSub) Shutdown() {
+	ps.mu.Lock()
+	defer ps.mu.Unlock()
+
+	for topic, subscribers := range ps.subscribers {
+		for ch := range subscribers {
+			close(ch)
+		}
+		delete(ps.subscribers, topic)
+	}
+}
