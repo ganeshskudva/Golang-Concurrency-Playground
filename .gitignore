@@ -23,3 +23,75 @@ go.work.sum
 
 # env file
 .env
+
+# macOS system files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
+
+# macOS folder attributes
+.Spotlight-V100
+.Trashes
+
+# macOS Finder tags
+*.swp
+.metadata_never_index
+
+# Windows system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux temporary files
+*~
+.nfs*
+
+# IDE files and folders
+# IntelliJ IDEA / GoLand
+.idea/
+*.iml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.cproject
+.settings/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Emacs
+*~
+\#*\#
+
+# vim swap files
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.orig
+
+# Binaries
+*.bin
+*.o
+*.a
+*.out
+*.pyc
+*.pyo
+*.pdb
+
+# Package manager directories
+node_modules/
+target/
+
