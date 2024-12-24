@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"ps Golang-Concurrency-Playground/pubsub/"
 	"sync"
+
+	ps "github.com/ganeshskudva/Golang-Concurrency-Playground/pubsub"
 )
 
 func main() {
