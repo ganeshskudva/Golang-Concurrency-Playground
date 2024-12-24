@@ -7,41 +7,60 @@ import (
 	ps "github.com/ganeshskudva/Golang-Concurrency-Playground/pubsub"
 )
 
+type NewsUpdate struct {
+	Headline string
+	Details  string
+}
+
 func main() {
-	ps := ps.NewPubSub()
+	// PubSub for string messages
+	stringPubSub := ps.NewPubSub[string]()
+	// PubSub for custom NewsUpdate struct
+	newsPubSub := ps.NewPubSub[NewsUpdate]()
 
-	// Subscribe to a topic
-	sub1 := ps.Subscribe("news")
-	sub2 := ps.Subscribe("news")
+	// Subscribe to topics
+	stringSub := stringPubSub.Subscribe("general")
+	newsSub := newsPubSub.Subscribe("news")
 
-	// Read messages from subscribers
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
+	// Goroutine to process string messages
 	go func() {
 		defer wg.Done()
-		for msg := range sub1 {
-			fmt.Println("Subscriber 1 received:", msg)
+		for msg := range stringSub {
+			fmt.Println("String Subscriber received:", msg)
 		}
 	}()
 
+	// Goroutine to process NewsUpdate messages
 	go func() {
 		defer wg.Done()
-		for msg := range sub2 {
-			fmt.Println("Subscriber 2 received:", msg)
+		for news := range newsSub {
+			fmt.Printf("News Subscriber received: Headline - %s, Details - %s\n", news.Headline, news.Details)
 		}
 	}()
 
-	// Publish messages
-	ps.Publish("news", "Breaking News: Go is awesome!")
-	ps.Publish("news", "Another update!")
+	// Publish heterogeneous messages
+	stringPubSub.Publish("general", "Hello, World!")
+	stringPubSub.Publish("general", "Go generics are powerful!")
 
-	// Unsubscribe after some delay
-	ps.Unsubscribe("news", sub1)
-	ps.Unsubscribe("news", sub2)
+	newsPubSub.Publish("news", NewsUpdate{
+		Headline: "Breaking News",
+		Details:  "Go supports generics from version 1.18",
+	})
+	newsPubSub.Publish("news", NewsUpdate{
+		Headline: "Another Update",
+		Details:  "PubSub system now supports heterogeneous types.",
+	})
 
-	// Shutdown and wait for goroutines to finish
-	ps.Shutdown()
+	// Unsubscribe and shutdown
+	stringPubSub.Unsubscribe("general", stringSub)
+	newsPubSub.Unsubscribe("news", newsSub)
+
+	stringPubSub.Shutdown()
+	newsPubSub.Shutdown()
+
 	wg.Wait()
 	fmt.Println("PubSub system shut down gracefully.")
 }
