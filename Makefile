@@ -1,31 +1,50 @@
+# Makefile for building and running Go targets
+
 # Variables
-BINARY_NAME := pubsub
-BUILD_DIR := ./bin
-SRC_DIR := ./cmd/pubsub
-GO_FILES := $(shell find . -name '*.go')
+GOCMD=go
+GOBUILD=$(GOCMD) build
+GORUN=$(GOCMD) run
+BINDIR=bin
 
-# Default target
-.PHONY: all
-all: build
+# Directories
+PUBSUB_DIR=cmd/pubsub
+DEADLOCK_DIR=cmd/deadlockprevention
+LIB_DIR=pubsub
 
-# Build target
-.PHONY: build
-build:
-	@echo "Building the binary..."
-	@mkdir -p $(BUILD_DIR)
-	go build -o $(BUILD_DIR)/$(BINARY_NAME) $(SRC_DIR)/main.go
+# Source Files
+PUBSUB_SRC=$(PUBSUB_DIR)/main.go
+DEADLOCK_SRC=$(DEADLOCK_DIR)/main.go
 
-# Run the application
-.PHONY: run
-run: build
-	@echo "Running the application..."
-	@./$(BUILD_DIR)/$(BINARY_NAME)
+# Targets
+PUBSUB_TARGET=$(BINDIR)/pubsub
+DEADLOCK_PREVENTION_TARGET=$(BINDIR)/deadlock_prevention
 
-# Clean target
-.PHONY: clean
+.PHONY: all clean run-pubsub run-deadlock
+
+# Default target: Build all binaries
+all: $(PUBSUB_TARGET) $(DEADLOCK_PREVENTION_TARGET)
+
+# Build pubsub
+$(PUBSUB_TARGET): $(PUBSUB_SRC)
+	mkdir -p $(BINDIR)
+	$(GOBUILD) -o $(PUBSUB_TARGET) $(PUBSUB_SRC)
+
+# Build deadlock prevention
+$(DEADLOCK_PREVENTION_TARGET): $(DEADLOCK_SRC)
+	mkdir -p $(BINDIR)
+	$(GOBUILD) -o $(DEADLOCK_PREVENTION_TARGET) $(DEADLOCK_SRC)
+
+# Run pubsub
+run-pubsub: $(PUBSUB_TARGET)
+	$(PUBSUB_TARGET)
+
+# Run deadlock prevention
+run-deadlock: $(DEADLOCK_PREVENTION_TARGET)
+	$(DEADLOCK_PREVENTION_TARGET)
+
+# Clean up build artifacts
 clean:
-	@echo "Cleaning up..."
-	@rm -rf $(BUILD_DIR)
+	rm -rf $(BINDIR)
 
 # Test target
 .PHONY: test

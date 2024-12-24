@@ -10,7 +10,7 @@ func TestHighThroughputPubSub(t *testing.T) {
 	ps := NewPubSub[string]()
 
 	const numPublishers = 10
-	const numSubscribers = 100
+	const numSubscribers = 10000
 	const numMessages = 1000
 
 	// Subscribe multiple subscribers
