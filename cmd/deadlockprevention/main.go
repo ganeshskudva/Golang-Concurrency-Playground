@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	ps "github.com/ganeshskudva/Golang-Concurrency-Playground/pubsub"
+	ps "github.com/ganeshskudva/Golang-Concurrency-Playground/pubsub/deadlockprevention"
 )
 
 func main() {
