@@ -19,7 +19,7 @@ func NewPubSub() *PubSub {
 }
 
 // Subscribe adds a subscriber to a specific topic
-func (ps *PubSub) Subscribe(topic string) <-chan string {
+func (ps *PubSub) Subscribe(topic string) chan string {
 	ch := make(chan string, 10) // Buffered channel with a larger buffer
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
@@ -46,7 +46,7 @@ func (ps *PubSub) Publish(topic, message string) {
 }
 
 // Unsubscribe removes a subscriber from a specific topic
-func (ps *PubSub) Unsubscribe(topic string, ch <-chan string) {
+func (ps *PubSub) Unsubscribe(topic string, ch chan string) {
 	ps.mu.Lock()
 	defer ps.mu.Unlock()
 
